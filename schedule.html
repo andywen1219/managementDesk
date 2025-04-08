@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日程管理</title>
+    <style>
+        /* 全局样式 */
+        :root {
+            --primary-color: #653EB3;
+            --primary-light: #8C6FD2;
+            --primary-dark: #4C2D99;
+            --danger-color: #F35252;
+            --warning-color: #E6A733;
+            --success-color: #3BB950;
+            --orange-color: #F28335;
+            --deep-purple: #6D2763;
+            --teal-color: #56A0B0;
+            --gray-color: #838383;
+            --light-gray: #E0E0E0;
+            --white: #FFFFFF;
+            --black: #333333;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background-color: #F5F5F5;
+            color: var(--black);
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+
+        /* 日程管理页面样式 */
+        .schedule-management {
+            display: flex;
+            flex-direction: column;
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 日历头部样式 */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .month-navigation {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .month-navigation h2 {
+            font-size: 18px;
+            color: var(--primary-color);
+            margin: 0;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .nav-button {
+            border: none;
+            background-color: var(--primary-light);
+            color: var(--white);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .nav-button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .view-options {
+            display: flex;
+            gap: 8px;
+        }
+
+        .view-button {
+            padding: 6px 12px;
+            border: 1px solid var(--primary-light);
+            background-color: var(--white);
+            color: var(--primary-color);
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .view-button:hover {
+            background-color: var(--primary-light);
+            color: var(--white);
+        }
+
+        .view-button.active {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border-color: var(--primary-color);
+        }
+
+        /* 添加日程按钮 */
+        .add-schedule-button {
+            padding: 6px 12px;
+            border: none;
+            background-color: var(--success-color);
+            color: var(--white);
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            margin-left: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .add-schedule-button:hover {
+            background-color: #2D9F3C;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(59, 185, 80, 0.4);
+        }
+
+        /* 日历容器样式 */
+        .calendar-container {
+            background-color: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--light-gray);
+        }
+
+        /* 工作日头部 */
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background-color: #F8F8F8;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .weekday {
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 14px;
+        }
+
+        /* 日期网格 */
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-auto-rows: minmax(100px, auto);
+        }
+
+        .day {
+            position: relative;
+            padding: 8px;
+            border-right: 1px solid var(--light-gray);
+            border-bottom: 1px solid var(--light-gray);
+            font-weight: 500;
+            transition: background-color 0.2s;
+            min-height: 100px;
+        }
+
+        .day:hover {
+            background-color: #F8F8F8;
+        }
+
+        .day.other-month {
+            color: var(--gray-color);
+            background-color: #FAFAFA;
+        }
+
+        .day.current-day {
+            background-color: rgba(101, 62, 179, 0.1);
+            font-weight: 700;
+        }
+
+        /* 周视图样式 */
+        .week-view {
+            display: none;
+            flex-direction: column;
+            background-color: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--light-gray);
+        }
+        
+        .week-view.active {
+            display: flex;
+        }
+        
+        .week-header {
+            display: grid;
+            grid-template-columns: 60px repeat(7, 1fr);
+            background-color: #F8F8F8;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .week-header .time-header {
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary-color);
+            border-right: 1px solid var(--light-gray);
+        }
+        
+        .week-header .day-header {
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary-color);
+            border-right: 1px solid var(--light-gray);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .week-header .day-header .day-name {
+            font-size: 14px;
+        }
+        
+        .week-header .day-header .day-date {
+            font-size: 18px;
+            margin-top: 5px;
+        }
+        
+        .week-header .day-header.current-day {
+            background-color: rgba(101, 62, 179, 0.1);
+        }
+        
+        .week-grid {
+            display: grid;
+            grid-template-columns: 60px repeat(7, 1fr);
+            grid-auto-rows: 60px;
+        }
+        
+        .time-cell {
+            padding: 8px;
+            text-align: center;
+            border-right: 1px solid var(--light-gray);
+            border-bottom: 1px solid var(--light-gray);
+            color: var(--gray-color);
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .week-cell {
+            position: relative;
+            border-right: 1px solid var(--light-gray);
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .week-event {
+            position: absolute;
+            left: 2px;
+            right: 2px;
+            border-radius: 4px;
+            color: var(--white);
+            padding: 2px 5px;
+            font-size: 12px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+            z-index: 10;
+        }
+        
+        .week-event.high {
+            background-color: var(--danger-color);
+        }
+        
+        .week-event.medium {
+            background-color: var(--orange-color);
+        }
+        
+        .week-event.low {
+            background-color: var(--success-color);
+        }
+
+        /* 日视图样式 */
+        .day-view {
+            display: none;
+            flex-direction: column;
+            background-color: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--light-gray);
+        }
+        
+        .day-view.active {
+            display: flex;
+        }
+        
+        .day-view-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+        
+        .day-date-display {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .day-navigation {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .day-nav-button {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: var(--white);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .day-nav-button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .day-timeline {
+            display: grid;
+            grid-template-columns: 60px 1fr;
+            grid-auto-rows: 60px;
+            overflow-y: auto;
+            max-height: 600px;
+        }
+        
+        .time-slot {
+            padding: 8px;
+            text-align: center;
+            border-right: 1px solid var(--light-gray);
+            border-bottom: 1px solid var(--light-gray);
+            color: var(--gray-color);
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .day-slot {
+            position: relative;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .current-time-indicator {
+            position: absolute;
+            left: 0;
+            right: 0;
+            border-top: 2px solid var(--danger-color);
+            z-index: 5;
+        }
+        
+        .current-time-indicator::after {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 0;
+            width: 8px;
+            height: 8px;
+            background-color: var(--danger-color);
+            border-radius: 50%;
+        }
+        
+        .day-event {
+            position: absolute;
+            left: 10px;
+            right: 10px;
+            border-radius: 4px;
+            color: var(--white);
+            padding: 5px 8px;
+            font-size: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            z-index: 10;
+        }
+        
+        .day-event.high {
+            background-color: var(--danger-color);
+        }
+        
+        .day-event.medium {
+            background-color: var(--orange-color);
+        }
+        
+        .day-event.low {
+            background-color: var(--success-color);
+        }
+
+        /* 事件样式 */
+        .event-indicator {
+            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .event {
+            font-size: 12px;
+            padding: 4px 6px;
+            border-radius: 4px;
+            color: var(--white);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .event:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .event.high {
+            background-color: var(--danger-color);
+        }
+
+        .event.medium {
+            background-color: var(--orange-color);
+        }
+
+        .event.low {
+            background-color: var(--success-color);
+        }
+
+        /* 今日日程样式 */
+        .schedule-events {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid var(--light-gray);
+        }
+
+        .schedule-events h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .schedule-events h3::after {
+            content: "添加日程";
+            font-size: 14px;
+            font-weight: normal;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 5px 10px;
+            border: 1px dashed var(--primary-light);
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .schedule-events h3:hover::after {
+            background-color: var(--primary-light);
+            color: var(--white);
+        }
+
+        .event-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .event-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background-color: #F8F8F8;
+            border-radius: 8px;
+            transition: transform 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .event-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .event-time {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--primary-color);
+            margin-right: 15px;
+            min-width: 50px;
+        }
+
+        .event-content {
+            flex: 1;
+        }
+
+        .event-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .event-details {
+            font-size: 13px;
+            color: var(--gray-color);
+        }
+
+        .event-priority {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+
+        .event-priority.high {
+            background-color: var(--danger-color);
+        }
+
+        .event-priority.medium {
+            background-color: var(--orange-color);
+        }
+
+        .event-priority.low {
+            background-color: var(--success-color);
+        }
+
+        .event-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: 15px;
+        }
+
+        .event-action {
+            cursor: pointer;
+            font-size: 16px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .event-action:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 80%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .modal-header h2 {
+            font-size: 18px;
+            color: var(--primary-color);
+        }
+
+        .close-modal {
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray-color);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--black);
+            font-size: 14px;
+        }
+
+        .form-select,
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--light-gray);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background-color: var(--white);
+        }
+
+        .form-select:focus,
+        .form-input:focus,
+        .form-textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(101, 62, 179, 0.1);
+            outline: none;
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--light-gray);
+        }
+
+        .cancel-button,
+        .submit-button,
+        .edit-button {
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cancel-button {
+            background-color: var(--white);
+            border: 1px solid var(--light-gray);
+            color: var(--gray-color);
+        }
+
+        .cancel-button:hover {
+            background-color: #f8f8f8;
+            border-color: var(--gray-color);
+        }
+
+        .submit-button,
+        .edit-button {
+            background-color: var(--primary-color);
+            border: none;
+            color: var(--white);
+        }
+
+        .submit-button:hover,
+        .edit-button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* 详情表格样式 */
+        .info-table-container {
+            margin-bottom: 20px;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .info-table th,
+        .info-table td {
+            padding: 12px;
+            border: 1px solid var(--light-gray);
+        }
+
+        .info-table th {
+            text-align: left;
+            background-color: #f8f8f8;
+            color: var(--primary-color);
+        }
+
+        /* 任务优先级样式 */
+        .task-priority {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .task-priority.high {
+            background-color: var(--danger-color);
+        }
+
+        .task-priority.medium {
+            background-color: var(--orange-color);
+        }
+
+        .task-priority.low {
+            background-color: var(--success-color);
+        }
+
+        /* 响应式调整 */
+        @media screen and (max-width: 768px) {
+            .calendar-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .view-options {
+                margin-top: 10px;
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .calendar-days {
+                grid-template-columns: repeat(7, 1fr);
+                grid-auto-rows: minmax(60px, auto);
+            }
+
+            .day {
+                min-height: 60px;
+                font-size: 12px;
+            }
+
+            .event {
+                font-size: 10px;
+                padding: 3px 4px;
+            }
+
+            .modal-content {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>日程管理系统</h1>
+    
+    <!-- 页面内容将通过JavaScript加载 -->
+    <div id="schedule-container"></div>
+
+    <!-- 日程管理相关模态框 -->
+    <div class="modal" id="eventModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>日程</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <!-- 日程表单内容将通过JavaScript动态加载 -->
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="eventDetailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>日程详情</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <!-- 日程详情内容将通过JavaScript动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载日程管理页面内容
+            loadSchedulePage();
+            
+            // 初始化模态框
+            initModals();
+        });
+
+        /**
+         * 初始化模态框功能
+         */
+        function initModals() {
+            // 关闭按钮
+            const closeButtons = document.querySelectorAll('.close-modal');
+            closeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const modal = this.closest('.modal');
+                    closeModal(modal);
+                });
+            });
+            
+            // 点击模态框外部关闭
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeModal(this);
+                    }
+                });
+            });
+        }
+
+        /**
+         * 打开模态框
+         * @param {HTMLElement} modal - 要打开的模态框元素
+         */
+        function openModal(modal) {
+            if (typeof modal === 'string') {
+                modal = document.getElementById(modal);
+            }
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // 防止背景滚动
+        }
+
+        /**
+         * 关闭模态框
+         * @param {HTMLElement} modal - 要关闭的模态框元素
+         */
+        function closeModal(modal) {
+            if (typeof modal === 'string') {
+                modal = document.getElementById(modal);
+            }
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        /**
+         * 加载日程管理页面内容
+         */
+        function loadSchedulePage() {
+            const container = document.getElementById('schedule-container');
+            
+            container.innerHTML = `
+                <div class="schedule-management">
+                    <div class="calendar-header">
+                        <div class="month-navigation">
+                            <button class="nav-button prev-month">◀</button>
+                            <h2>2023年6月</h2>
+                            <button class="nav-button next-month">▶</button>
+                        </div>
+                        <div class="view-options">
+                            <button class="view-button active" data-view="month">月视图</button>
+                            <button class="view-button" data-view="week">周视图</button>
+                            <button class="view-button" data-view="day">日视图</button>
+                            <button class="add-schedule-button">+ 添加日程</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 月视图 -->
+                    <div class="calendar-container" id="month-view">
+                        <div class="calendar-weekdays">
+                            <div class="weekday">周日</div>
+                            <div class="weekday">周一</div>
+                            <div class="weekday">周二</div>
+                            <div class="weekday">周三</div>
+                            <div class="weekday">周四</div>
+                            <div class="weekday">周五</div>
+                            <div class="weekday">周六</div>
+                        </div>
+                        <div class="calendar-days">
+                            <div class="day other-month">28</div>
+                            <div class="day other-month">29</div>
+                            <div class="day other-month">30</div>
+                            <div class="day other-month">31</div>
+                            <div class="day">1</div>
+                            <div class="day">2</div>
+                            <div class="day">3</div>
+                            <div class="day">4</div>
+                            <div class="day">5</div>
+                            <div class="day">6</div>
+                            <div class="day">7</div>
+                            <div class="day">8</div>
+                            <div class="day">9</div>
+                            <div class="day">10</div>
+                            <div class="day">11</div>
+                            <div class="day">12</div>
+                            <div class="day">13</div>
+                            <div class="day">14</div>
+                            <div class="day current-day">15
+                                <div class="event-indicator">
+                                    <div class="event high" onclick="openEventDetailModal('1')">14:30 客户信用评估</div>
+                                    <div class="event medium" onclick="openEventDetailModal('2')">16:00 风险客户回访</div>
+                                </div>
+                            </div>
+                            <div class="day">16
+                                <div class="event-indicator">
+                                    <div class="event medium" onclick="openEventDetailModal('3')">10:00 贷款审批</div>
+                                </div>
+                            </div>
+                            <div class="day">17</div>
+                            <div class="day">18
+                                <div class="event-indicator">
+                                    <div class="event high" onclick="openEventDetailModal('4')">09:30 合同签署</div>
+                                </div>
+                            </div>
+                            <div class="day">19</div>
+                            <div class="day">20
+                                <div class="event-indicator">
+                                    <div class="event low" onclick="openEventDetailModal('5')">15:30 客户回访</div>
+                                </div>
+                            </div>
+                            <div class="day">21</div>
+                            <div class="day">22</div>
+                            <div class="day">23</div>
+                            <div class="day">24</div>
+                            <div class="day">25</div>
+                            <div class="day">26</div>
+                            <div class="day">27</div>
+                            <div class="day">28</div>
+                            <div class="day">29</div>
+                            <div class="day">30</div>
+                            <div class="day other-month">1</div>
+                            <div class="day other-month">2</div>
+                            <div class="day other-month">3</div>
+                            <div class="day other-month">4</div>
+                            <div class="day other-month">5</div>
+                            <div class="day other-month">6</div>
+                            <div class="day other-month">7</div>
+                            <div class="day other-month">8</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 周视图 -->
+                    <div class="week-view" id="week-view">
+                        <div class="week-header">
+                            <div class="time-header"></div>
+                            <div class="day-header"><span class="day-name">周一</span><span class="day-date">12</span></div>
+                            <div class="day-header"><span class="day-name">周二</span><span class="day-date">13</span></div>
+                            <div class="day-header"><span class="day-name">周三</span><span class="day-date">14</span></div>
+                            <div class="day-header current-day"><span class="day-name">周四</span><span class="day-date">15</span></div>
+                            <div class="day-header"><span class="day-name">周五</span><span class="day-date">16</span></div>
+                            <div class="day-header"><span class="day-name">周六</span><span class="day-date">17</span></div>
+                            <div class="day-header"><span class="day-name">周日</span><span class="day-date">18</span></div>
+                        </div>
+                        <div class="week-grid">
+                            <!-- 时间列 -->
+                            <div class="time-cell">9:00</div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            
+                            <div class="time-cell">10:00</div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell">
+                                <div class="week-event medium" style="top: 0; height: 80%;" onclick="openEventDetailModal('3')">贷款审批</div>
+                            </div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            
+                            <div class="time-cell">11:00</div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            
+                            <div class="time-cell">12:00</div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            
+                            <div class="time-cell">13:00</div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            
+                            <div class="time-cell">14:00</div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell">
+                                <div class="week-event high" style="top: 50%; height: 100%;" onclick="openEventDetailModal('1')">客户信用评估</div>
+                            </div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            
+                            <div class="time-cell">15:00</div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            
+                            <div class="time-cell">16:00</div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell">
+                                <div class="week-event medium" style="top: 0; height: 90%;" onclick="openEventDetailModal('2')">风险客户回访</div>
+                            </div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            
+                            <div class="time-cell">17:00</div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                            <div class="week-cell"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 日视图 -->
+                    <div class="day-view" id="day-view">
+                        <div class="day-view-header">
+                            <div class="day-navigation">
+                                <button class="day-nav-button prev-day">←</button>
+                            </div>
+                            <div class="day-date-display">2023年6月15日 星期四</div>
+                            <div class="day-navigation">
+                                <button class="day-nav-button next-day">→</button>
+                            </div>
+                        </div>
+                        <div class="day-timeline">
+                            <div class="time-slot">9:00</div>
+                            <div class="day-slot"></div>
+                            
+                            <div class="time-slot">10:00</div>
+                            <div class="day-slot"></div>
+                            
+                            <div class="time-slot">11:00</div>
+                            <div class="day-slot"></div>
+                            
+                            <div class="time-slot">12:00</div>
+                            <div class="day-slot"></div>
+                            
+                            <div class="time-slot">13:00</div>
+                            <div class="day-slot"></div>
+                            
+                            <div class="time-slot">14:00</div>
+                            <div class="day-slot">
+                                <div class="day-event high" style="top: 30px; height: 90px;" onclick="openEventDetailModal('1')">
+                                    14:30 - 16:00<br>客户信用评估<br>杭州XX科技有限公司
+                                </div>
+                            </div>
+                            
+                            <div class="time-slot">15:00</div>
+                            <div class="day-slot"></div>
+                            
+                            <div class="time-slot">16:00</div>
+                            <div class="day-slot">
+                                <div class="day-event medium" style="top: 0; height: 90px;" onclick="openEventDetailModal('2')">
+                                    16:00 - 17:30<br>风险客户回访<br>杭州AA电子商务有限公司
+                                </div>
+                            </div>
+                            
+                            <div class="time-slot">17:00</div>
+                            <div class="day-slot"></div>
+                            
+                            <div class="time-slot">18:00</div>
+                            <div class="day-slot"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="schedule-events">
+                        <h3>今日日程</h3>
+                        <div class="event-list">
+                            <div class="event-item" onclick="openEventDetailModal('1')">
+                                <div class="event-time">14:30</div>
+                                <div class="event-content">
+                                    <div class="event-title">客户信用评估</div>
+                                    <div class="event-details">杭州XX科技有限公司 - 李客户经理</div>
+                                </div>
+                                <div class="event-priority high"></div>
+                                <div class="event-actions">
+                                    <div class="event-action edit-action" onclick="event.stopPropagation(); openEditEventModal('1')">✏️</div>
+                                    <div class="event-action delete-action" onclick="event.stopPropagation(); confirmDeleteEvent('1')">🗑️</div>
+                                </div>
+                            </div>
+                            <div class="event-item" onclick="openEventDetailModal('2')">
+                                <div class="event-time">16:00</div>
+                                <div class="event-content">
+                                    <div class="event-title">风险客户回访</div>
+                                    <div class="event-details">杭州AA电子商务有限公司 - 李客户经理</div>
+                                </div>
+                                <div class="event-priority medium"></div>
+                                <div class="event-actions">
+                                    <div class="event-action edit-action" onclick="event.stopPropagation(); openEditEventModal('2')">✏️</div>
+                                    <div class="event-action delete-action" onclick="event.stopPropagation(); confirmDeleteEvent('2')">🗑️</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 绑定事件
+            bindScheduleEvents();
+        }
+
+        /**
+         * 绑定日程管理页面的事件
+         */
+        function bindScheduleEvents() {
+            // 月份导航按钮事件
+            const prevMonthBtn = document.querySelector('.prev-month');
+            const nextMonthBtn = document.querySelector('.next-month');
+            
+            if (prevMonthBtn) {
+                prevMonthBtn.addEventListener('click', () => {
+                    // 切换到上个月
+                    alert('切换到上个月的功能将在未来版本实现');
+                });
+            }
+            
+            if (nextMonthBtn) {
+                nextMonthBtn.addEventListener('click', () => {
+                    // 切换到下个月
+                    alert('切换到下个月的功能将在未来版本实现');
+                });
+            }
+            
+            // 视图按钮事件
+            const viewButtons = document.querySelectorAll('.view-button');
+            
+            viewButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // 移除所有按钮的active类
+                    viewButtons.forEach(btn => btn.classList.remove('active'));
+                    // 给当前点击的按钮添加active类
+                    button.classList.add('active');
+                    
+                    // 获取选择的视图类型
+                    const viewType = button.getAttribute('data-view');
+                    
+                    // 隐藏所有视图
+                    document.getElementById('month-view').style.display = 'none';
+                    document.getElementById('week-view').style.display = 'none';
+                    document.getElementById('day-view').style.display = 'none';
+                    
+                    // 获取今日日程元素
+                    const scheduleEvents = document.querySelector('.schedule-events');
+                    
+                    // 显示选择的视图
+                    if (viewType === 'month') {
+                        document.getElementById('month-view').style.display = 'block';
+                        scheduleEvents.style.display = 'block'; // 显示今日日程
+                    } else if (viewType === 'week') {
+                        document.getElementById('week-view').style.display = 'flex';
+                        scheduleEvents.style.display = 'block'; // 显示今日日程
+                    } else if (viewType === 'day') {
+                        document.getElementById('day-view').style.display = 'flex';
+                        scheduleEvents.style.display = 'none'; // 隐藏今日日程
+                    }
+                });
+            });
+            
+            // 日/周视图的前一天/后一天导航按钮
+            const prevDayBtn = document.querySelector('.prev-day');
+            const nextDayBtn = document.querySelector('.next-day');
+            
+            if (prevDayBtn) {
+                prevDayBtn.addEventListener('click', () => {
+                    alert('切换到前一天的功能将在未来版本实现');
+                });
+            }
+            
+            if (nextDayBtn) {
+                nextDayBtn.addEventListener('click', () => {
+                    alert('切换到后一天的功能将在未来版本实现');
+                });
+            }
+            
+            // 添加当前时间指示器（仅在日视图中）
+            if (document.querySelector('.day-timeline')) {
+                const now = new Date();
+                const hours = now.getHours();
+                const minutes = now.getMinutes();
+                
+                // 只处理工作时间内的时间（9:00-18:00）
+                if (hours >= 9 && hours < 18) {
+                    const daySlots = document.querySelectorAll('.day-slot');
+                    const hourIndex = hours - 9; // 从9点开始，所以9点是索引0
+                    const minutePercentage = (minutes / 60) * 100;
+                    
+                    if (daySlots[hourIndex]) {
+                        const indicator = document.createElement('div');
+                        indicator.className = 'current-time-indicator';
+                        indicator.style.top = `${minutePercentage}%`;
+                        daySlots[hourIndex].appendChild(indicator);
+                    }
+                }
+            }
+            
+            // 添加日程按钮事件
+            const addScheduleButton = document.querySelector('.add-schedule-button');
+            
+            if (addScheduleButton) {
+                addScheduleButton.addEventListener('click', () => {
+                    openAddEventModal();
+                });
+            }
+            
+            // 日期点击事件
+            const days = document.querySelectorAll('.day');
+            
+            days.forEach(day => {
+                day.addEventListener('click', (e) => {
+                    // 仅当点击的是日期区域而不是事件时才触发
+                    if (e.target === day) {
+                        const dayNum = day.textContent.trim().split('\n')[0];
+                        if (!day.classList.contains('other-month')) {
+                            openAddEventModal(`2023-06-${dayNum.padStart(2, '0')}`);
+                        }
+                    }
+                });
+            });
+            
+            // 今日日程标题中的"添加日程"点击事件
+            const todayEventsTitle = document.querySelector('.schedule-events h3');
+            
+            if (todayEventsTitle) {
+                todayEventsTitle.addEventListener('click', (e) => {
+                    // 检查点击的是否是伪元素区域
+                    const rect = todayEventsTitle.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    
+                    // 如果点击的是右侧区域（伪元素位置），则打开添加日程模态框
+                    if (x > rect.width / 2) {
+                        openAddEventModal();
+                    }
+                });
+            }
+            
+            // 为事件项目设置对应的边框颜色
+            const eventItems = document.querySelectorAll('.event-item');
+            
+            eventItems.forEach(item => {
+                const priority = item.querySelector('.event-priority');
+                if (priority) {
+                    if (priority.classList.contains('high')) {
+                        item.style.borderLeft = '4px solid var(--danger-color)';
+                    } else if (priority.classList.contains('medium')) {
+                        item.style.borderLeft = '4px solid var(--orange-color)';
+                    } else if (priority.classList.contains('low')) {
+                        item.style.borderLeft = '4px solid var(--success-color)';
+                    }
+                }
+            });
+        }
+
+        /**
+         * 打开添加日程模态框
+         * @param {string} date 可选的日期字符串，格式为YYYY-MM-DD
+         */
+        function openAddEventModal(date) {
+            // 打开添加日程的模态框
+            const modal = document.getElementById('eventModal');
+            const modalContent = modal.querySelector('.modal-content');
+            
+            if (!modal.classList.contains('active')) {
+                modal.classList.add('active');
+            }
+            
+            const dateStr = date || '2023-06-15';
+            const formattedDate = dateStr.split('-')[2] + '日';
+            
+            modalContent.innerHTML = `
+                <div class="modal-header">
+                    <h2>添加日程 - 6月${formattedDate}</h2>
+                    <span class="close-modal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="eventForm">
+                        <div class="form-group">
+                            <label class="form-label">日程标题</label>
+                            <input type="text" class="form-input" placeholder="请输入日程标题">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">时间</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="time" class="form-input" value="09:00">
+                                <span style="align-self: center;">至</span>
+                                <input type="time" class="form-input" value="10:00">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">关联客户</label>
+                            <select class="form-select">
+                                <option value="">请选择客户</option>
+                                <option value="1">杭州XX科技有限公司</option>
+                                <option value="2">宁波YY贸易有限公司</option>
+                                <option value="3">温州ZZ制造有限公司</option>
+                                <option value="4">杭州AA电子商务有限公司</option>
+                                <option value="5">台州BB物流有限公司</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">优先级</label>
+                            <div style="display: flex; gap: 15px;">
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="radio" name="priority" value="low"> 
+                                    <span class="task-priority low" style="margin-right: 5px;"></span>低
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="radio" name="priority" value="medium" checked> 
+                                    <span class="task-priority medium" style="margin-right: 5px;"></span>中
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="radio" name="priority" value="high"> 
+                                    <span class="task-priority high" style="margin-right: 5px;"></span>高
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">备注</label>
+                            <textarea class="form-textarea" placeholder="请输入日程备注信息"></textarea>
+                        </div>
+                        
+                        <div class="form-buttons">
+                            <button type="button" class="cancel-button" onclick="closeModal('eventModal')">取消</button>
+                            <button type="button" class="submit-button" onclick="saveEvent()">保存</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            // 绑定关闭模态框事件
+            const closeBtn = modalContent.querySelector('.close-modal');
+            closeBtn.addEventListener('click', () => {
+                closeModal('eventModal');
+            });
+        }
+
+        /**
+         * 打开日程详情模态框
+         * @param {string} eventId 日程ID
+         */
+        function openEventDetailModal(eventId) {
+            // 防止冒泡
+            if (event) {
+                event.stopPropagation();
+            }
+
+            // 打开日程详情模态框
+            const modal = document.getElementById('eventDetailModal');
+            const modalContent = modal.querySelector('.modal-content');
+            
+            if (!modal.classList.contains('active')) {
+                modal.classList.add('active');
+            }
+            
+            // 示例数据
+            let eventData = {
+                id: eventId,
+                title: '客户信用评估',
+                date: '2023-06-15',
+                startTime: '14:30',
+                endTime: '16:00',
+                customer: '杭州XX科技有限公司',
+                manager: '李客户经理',
+                priority: 'high',
+                notes: '这是一个重要的客户评估会议，需要准备相关材料并提前联系客户确认时间。',
+                status: '未开始'
+            };
+            
+            // 根据ID获取不同的示例数据
+            if (eventId === '2') {
+                eventData = {
+                    id: eventId,
+                    title: '风险客户回访',
+                    date: '2023-06-15',
+                    startTime: '16:00',
+                    endTime: '17:30',
+                    customer: '杭州AA电子商务有限公司',
+                    manager: '李客户经理',
+                    priority: 'medium',
+                    notes: '该客户近期出现逾期风险，需要进行回访沟通，了解客户经营状况。',
+                    status: '未开始'
+                };
+            } else if (eventId === '3') {
+                eventData = {
+                    id: eventId,
+                    title: '贷款审批',
+                    date: '2023-06-16',
+                    startTime: '10:00',
+                    endTime: '11:30',
+                    customer: '宁波YY贸易有限公司',
+                    manager: '王客户经理',
+                    priority: 'medium',
+                    notes: '该客户提交的贷款申请需要审核评估。',
+                    status: '未开始'
+                };
+            } else if (eventId === '4') {
+                eventData = {
+                    id: eventId,
+                    title: '合同签署',
+                    date: '2023-06-18',
+                    startTime: '09:30',
+                    endTime: '11:00',
+                    customer: '台州BB物流有限公司',
+                    manager: '王客户经理',
+                    priority: 'high',
+                    notes: '与客户进行贷款合同签署，需要准备相关材料。',
+                    status: '未开始'
+                };
+            } else if (eventId === '5') {
+                eventData = {
+                    id: eventId,
+                    title: '客户回访',
+                    date: '2023-06-20',
+                    startTime: '15:30',
+                    endTime: '16:30',
+                    customer: '温州ZZ制造有限公司',
+                    manager: '赵客户经理',
+                    priority: 'low',
+                    notes: '常规客户回访，了解客户近期经营情况。',
+                    status: '未开始'
+                };
+            }
+            
+            // 根据优先级显示不同的标签样式
+            let priorityText = '低';
+            let priorityClass = 'low';
+            
+            if (eventData.priority === 'medium') {
+                priorityText = '中';
+                priorityClass = 'medium';
+            } else if (eventData.priority === 'high') {
+                priorityText = '高';
+                priorityClass = 'high';
+            }
+            
+            modalContent.innerHTML = `
+                <div class="modal-header">
+                    <h2>日程详情</h2>
+                    <span class="close-modal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                        <h3 style="font-size: 18px; margin: 0;">${eventData.title}</h3>
+                        <span class="task-priority ${priorityClass}">${priorityText}</span>
+                    </div>
+                    
+                    <div class="info-table-container">
+                        <table class="info-table">
+                            <tr>
+                                <th width="120">日期时间</th>
+                                <td>${eventData.date} ${eventData.startTime} - ${eventData.endTime}</td>
+                            </tr>
+                            <tr>
+                                <th>关联客户</th>
+                                <td>${eventData.customer}</td>
+                            </tr>
+                            <tr>
+                                <th>负责人</th>
+                                <td>${eventData.manager}</td>
+                            </tr>
+                            <tr>
+                                <th>状态</th>
+                                <td>${eventData.status}</td>
+                            </tr>
+                            <tr>
+                                <th>备注</th>
+                                <td>${eventData.notes || '无'}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class="form-buttons">
+                        <button type="button" class="cancel-button" onclick="closeModal('eventDetailModal')">关闭</button>
+                        <button type="button" class="edit-button submit-button" onclick="openEditEventModal('${eventData.id}')">编辑</button>
+                    </div>
+                </div>
+            `;
+            
+            // 绑定关闭模态框事件
+            const closeBtn = modalContent.querySelector('.close-modal');
+            closeBtn.addEventListener('click', () => {
+                closeModal('eventDetailModal');
+            });
+        }
+
+        /**
+         * 打开编辑日程模态框
+         * @param {string} eventId 日程ID
+         */
+        function openEditEventModal(eventId) {
+            // 防止冒泡
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            // 关闭可能打开的详情模态框
+            closeModal('eventDetailModal');
+            
+            // 打开编辑日程模态框
+            const modal = document.getElementById('eventModal');
+            const modalContent = modal.querySelector('.modal-content');
+            
+            if (!modal.classList.contains('active')) {
+                modal.classList.add('active');
+            }
+            
+            // 示例数据，实际应用中应该从服务器获取
+            let eventData = {
+                id: eventId,
+                title: '客户信用评估',
+                date: '2023-06-15',
+                startTime: '14:30',
+                endTime: '16:00',
+                customerId: '1',
+                customer: '杭州XX科技有限公司',
+                priority: 'high',
+                notes: '这是一个重要的客户评估会议，需要准备相关材料并提前联系客户确认时间。'
+            };
+            
+            // 根据ID获取不同的示例数据
+            if (eventId === '2') {
+                eventData = {
+                    id: eventId,
+                    title: '风险客户回访',
+                    date: '2023-06-15',
+                    startTime: '16:00',
+                    endTime: '17:30',
+                    customerId: '4',
+                    customer: '杭州AA电子商务有限公司',
+                    priority: 'medium',
+                    notes: '该客户近期出现逾期风险，需要进行回访沟通，了解客户经营状况。'
+                };
+            } else if (eventId === '3') {
+                eventData = {
+                    id: eventId,
+                    title: '贷款审批',
+                    date: '2023-06-16',
+                    startTime: '10:00',
+                    endTime: '11:30',
+                    customerId: '2',
+                    customer: '宁波YY贸易有限公司',
+                    priority: 'medium',
+                    notes: '该客户提交的贷款申请需要审核评估。'
+                };
+            }
+            
+            const formattedDate = eventData.date.split('-')[2] + '日';
+            
+            modalContent.innerHTML = `
+                <div class="modal-header">
+                    <h2>编辑日程 - 6月${formattedDate}</h2>
+                    <span class="close-modal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="eventForm">
+                        <div class="form-group">
+                            <label class="form-label">日程标题</label>
+                            <input type="text" class="form-input" value="${eventData.title}" placeholder="请输入日程标题">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">时间</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="time" class="form-input" value="${eventData.startTime}">
+                                <span style="align-self: center;">至</span>
+                                <input type="time" class="form-input" value="${eventData.endTime}">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">关联客户</label>
+                            <select class="form-select">
+                                <option value="">请选择客户</option>
+                                <option value="1" ${eventData.customerId === '1' ? 'selected' : ''}>杭州XX科技有限公司</option>
+                                <option value="2" ${eventData.customerId === '2' ? 'selected' : ''}>宁波YY贸易有限公司</option>
+                                <option value="3" ${eventData.customerId === '3' ? 'selected' : ''}>温州ZZ制造有限公司</option>
+                                <option value="4" ${eventData.customerId === '4' ? 'selected' : ''}>杭州AA电子商务有限公司</option>
+                                <option value="5" ${eventData.customerId === '5' ? 'selected' : ''}>台州BB物流有限公司</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">优先级</label>
+                            <div style="display: flex; gap: 15px;">
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="radio" name="priority" value="low" ${eventData.priority === 'low' ? 'checked' : ''}> 
+                                    <span class="task-priority low" style="margin-right: 5px;"></span>低
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="radio" name="priority" value="medium" ${eventData.priority === 'medium' ? 'checked' : ''}> 
+                                    <span class="task-priority medium" style="margin-right: 5px;"></span>中
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="radio" name="priority" value="high" ${eventData.priority === 'high' ? 'checked' : ''}> 
+                                    <span class="task-priority high" style="margin-right: 5px;"></span>高
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">备注</label>
+                            <textarea class="form-textarea" placeholder="请输入日程备注信息">${eventData.notes || ''}</textarea>
+                        </div>
+                        
+                        <div class="form-buttons">
+                            <button type="button" class="cancel-button" onclick="closeModal('eventModal')">取消</button>
+                            <button type="button" class="submit-button" onclick="updateEvent('${eventData.id}')">保存</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            // 绑定关闭模态框事件
+            const closeBtn = modalContent.querySelector('.close-modal');
+            closeBtn.addEventListener('click', () => {
+                closeModal('eventModal');
+            });
+        }
+
+        /**
+         * 保存新日程
+         */
+        function saveEvent() {
+            alert('日程已保存（实际保存功能将在未来版本实现）');
+            closeModal('eventModal');
+        }
+
+        /**
+         * 更新日程
+         * @param {string} eventId 日程ID
+         */
+        function updateEvent(eventId) {
+            alert(`日程ID: ${eventId} 已更新（实际更新功能将在未来版本实现）`);
+            closeModal('eventModal');
+        }
+
+        /**
+         * 确认删除日程
+         * @param {string} eventId 日程ID
+         */
+        function confirmDeleteEvent(eventId) {
+            if (confirm('确定要删除这个日程吗？')) {
+                alert('日程已删除（实际删除功能将在未来版本实现）');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实控人信息</title>
+    <style>
+        /* 全局样式变量 */
+        :root {
+            --primary-color: #653EB3;
+            --primary-light: #7A5DC7;
+            --secondary-color: #5934A1;
+            --accent-color: #FF9F43;
+            --warning-color: #FF6B6B;
+            --danger-color: #FF5252;
+            --success-color: #28C76F;
+            --info-color: #00CFE8;
+            --light-bg: #F8F8F8;
+            --white: #FFFFFF;
+            --text-color: #555555;
+            --gray-color: #8A8A8A;
+            --light-gray: #EAEAEA;
+            --border-color: #E4E4E4;
+            --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+        
+        /* 基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text-color);
+            background-color: var(--light-bg);
+        }
+        
+        /* 页面容器 */
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        
+        /* 内容区域样式 */
+        .controller-info-container {
+            margin-top: 20px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: var(--white);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .section-title {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            font-size: 18px;
+            font-weight: 600;
+            position: relative;
+            padding-left: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-title::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 18px;
+            background-color: var(--primary-color);
+            border-radius: 2px;
+        }
+        
+        /* 卡片网格布局 */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .info-item {
+            background-color: var(--light-bg);
+            border-radius: var(--radius-sm);
+            padding: 12px 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .info-label {
+            color: var(--gray-color);
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            color: var(--text-color);
+            font-size: 15px;
+            font-weight: 500;
+        }
+        
+        /* 表格样式 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+        
+        .data-table th, 
+        .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .data-table th {
+            background-color: rgba(101, 62, 179, 0.05);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .data-table tbody tr:hover {
+            background-color: rgba(101, 62, 179, 0.02);
+        }
+        
+        .data-table .actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            border: none;
+            outline: none;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-light);
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            color: var(--white);
+        }
+        
+        .btn-success:hover {
+            background-color: #23ad60;
+        }
+        
+        .btn-warning {
+            background-color: var(--accent-color);
+            color: var(--white);
+        }
+        
+        .btn-warning:hover {
+            background-color: #f0922d;
+        }
+        
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        
+        .btn-icon {
+            margin-right: 5px;
+        }
+        
+        /* 编辑状态样式 */
+        .editing {
+            background-color: rgba(0, 207, 232, 0.1);
+        }
+        
+        .editing input,
+        .editing select {
+            padding: 8px 10px;
+            border: 1px solid var(--info-color);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            width: 100%;
+        }
+        
+        .editing .info-value {
+            padding: 5px;
+        }
+        
+        .edit-input {
+            border: 1px solid var(--info-color);
+            border-radius: var(--radius-sm);
+            padding: 8px 10px;
+            font-size: 14px;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        .edit-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(101, 62, 179, 0.2);
+        }
+        
+        /* 模态框样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background-color: var(--white);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-md);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--gray-color);
+        }
+        
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(101, 62, 179, 0.2);
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        /* 表单网格布局 */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        /* 通知提示样式 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: var(--radius-md);
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            box-shadow: var(--shadow-md);
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .notification.success {
+            background-color: var(--success-color);
+        }
+        
+        .notification.error {
+            background-color: var(--danger-color);
+        }
+        
+        .notification.warning {
+            background-color: var(--warning-color);
+        }
+        
+        /* 响应式布局 */
+        @media (max-width: 992px) {
+            .info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .data-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            .section {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="controller-info-container">
+            <!-- 实控人基本信息部分 -->
+            <div class="section" id="basic-info-section">
+                <h2 class="section-title">实控人基本信息
+                    <button class="btn btn-primary btn-sm" id="editBasicInfoBtn">
+                        <span class="btn-icon">✏️</span>编辑
+                    </button>
+                </h2>
+                <div class="info-grid" id="basicInfoGrid">
+                    <div class="info-item">
+                        <div class="info-label">实控人姓名</div>
+                        <div class="info-value" data-field="name">张三</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">身份证号</div>
+                        <div class="info-value" data-field="idCard">888888888888888888</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">联系方式</div>
+                        <div class="info-value" data-field="phone">18788888888</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">户籍地</div>
+                        <div class="info-value" data-field="address">浙江省杭州市</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">年龄</div>
+                        <div class="info-value" data-field="age">48岁</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">性别</div>
+                        <div class="info-value" data-field="gender">男</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">最高学历</div>
+                        <div class="info-value" data-field="education">本科</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">是否桐庐系</div>
+                        <div class="info-value" data-field="isTonglu">是</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">个人爱好</div>
+                        <div class="info-value" data-field="hobby">乒乓球、跑步、K歌</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">产品偏好</div>
+                        <div class="info-value" data-field="productPreference">一次性还本付息</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">营销偏好</div>
+                        <div class="info-value" data-field="marketingPreference">一对一专属服务</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">人脉资源</div>
+                        <div class="info-value" data-field="connections">核心管理层</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">北京资源</div>
+                        <div class="info-value" data-field="beijingResource">企业家</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">体系内关联网点数</div>
+                        <div class="info-value" data-field="internalPoints">6个</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">体系外关联网点数</div>
+                        <div class="info-value" data-field="externalPoints">8个</div>
+                    </div>
+                </div>
+                <div class="edit-actions" id="basicInfoEditActions" style="display: none; margin-top: 20px; text-align: right;">
+                    <button class="btn btn-success" id="saveBasicInfoBtn">保存</button>
+                    <button class="btn btn-warning" id="cancelBasicInfoBtn" style="margin-left: 10px;">取消</button>
+                </div>
+            </div>
+            
+            <!-- 实控人资产信息部分 -->
+            <div class="section" id="assets-section">
+                <h2 class="section-title">实控人资产信息</h2>
+                
+                <!-- 房产信息部分 -->
+                <div class="subsection" id="property-section">
+                    <h3 class="subsection-title">
+                        房产信息
+                        <button class="btn btn-primary btn-sm" id="addPropertyBtn">
+                            <span class="btn-icon">+</span>新增
+                        </button>
+                    </h3>
+                    <div class="table-responsive">
+                        <table class="data-table" id="propertyTable">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>房产类型</th>
+                                    <th>面积</th>
+                                    <th>购置价格(万元)</th>
+                                    <th>购买年份</th>
+                                    <th>地址</th>
+                                    <th>是否本人持有</th>
+                                    <th>抵押情况</th>
+                                    <th>融资余额(万元)</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="propertyTableBody">
+                                <!-- 这里将通过JavaScript生成房产信息表格内容 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- 车辆信息部分 -->
+                <div class="subsection" id="vehicle-section">
+                    <h3 class="subsection-title">
+                        车辆信息
+                        <button class="btn btn-primary btn-sm" id="addVehicleBtn">
+                            <span class="btn-icon">+</span>新增
+                        </button>
+                    </h3>
+                    <div class="table-responsive">
+                        <table class="data-table" id="vehicleTable">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>品牌</th>
+                                    <th>系列</th>
+                                    <th>购买年份</th>
+                                    <th>购置价格(万元)</th>
+                                    <th>是否本人持有</th>
+                                    <th>抵押情况</th>
+                                    <th>融资余额(万元)</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vehicleTableBody">
+                                <!-- 这里将通过JavaScript生成车辆信息表格内容 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 这里将添加模态框和JavaScript代码 -->
+    
+    <!-- 模态框 -->
+    <!-- 房产信息模态框 -->
+    <div class="modal-overlay" id="propertyModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="propertyModalTitle">添加房产信息</h3>
+                <button class="modal-close" id="closePropertyModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="propertyForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="propertyType">房产类型</label>
+                            <select class="form-control" id="propertyType" required>
+                                <option value="">请选择</option>
+                                <option value="住宅">住宅</option>
+                                <option value="商铺">商铺</option>
+                                <option value="写字楼">写字楼</option>
+                                <option value="厂房">厂房</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="propertyArea">面积(平方米)</label>
+                            <input type="number" class="form-control" id="propertyArea" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="propertyPrice">购置价格(万元)</label>
+                            <input type="number" step="0.01" class="form-control" id="propertyPrice" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="propertyYear">购买年份</label>
+                            <input type="number" min="1980" max="2023" class="form-control" id="propertyYear" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="propertyAddress">地址</label>
+                        <input type="text" class="form-control" id="propertyAddress" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="propertyOwner">是否本人持有</label>
+                            <select class="form-control" id="propertyOwner" required>
+                                <option value="">请选择</option>
+                                <option value="是">是</option>
+                                <option value="否">否</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="propertyMortgage">抵押情况</label>
+                            <select class="form-control" id="propertyMortgage" required>
+                                <option value="">请选择</option>
+                                <option value="无抵押">无抵押</option>
+                                <option value="有抵押">有抵押</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="propertyFinance">融资余额(万元)</label>
+                        <input type="number" step="0.01" class="form-control" id="propertyFinance" required>
+                    </div>
+                    <input type="hidden" id="propertyIndex" value="-1">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="savePropertyBtn">保存</button>
+                <button class="btn btn-warning" id="cancelPropertyBtn">取消</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 车辆信息模态框 -->
+    <div class="modal-overlay" id="vehicleModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="vehicleModalTitle">添加车辆信息</h3>
+                <button class="modal-close" id="closeVehicleModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="vehicleForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="vehicleBrand">品牌</label>
+                            <input type="text" class="form-control" id="vehicleBrand" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="vehicleSeries">系列</label>
+                            <input type="text" class="form-control" id="vehicleSeries" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="vehicleYear">购买年份</label>
+                            <input type="number" min="1980" max="2023" class="form-control" id="vehicleYear" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="vehiclePrice">购置价格(万元)</label>
+                            <input type="number" step="0.01" class="form-control" id="vehiclePrice" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="vehicleOwner">是否本人持有</label>
+                            <select class="form-control" id="vehicleOwner" required>
+                                <option value="">请选择</option>
+                                <option value="是">是</option>
+                                <option value="否">否</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="vehicleMortgage">抵押情况</label>
+                            <select class="form-control" id="vehicleMortgage" required>
+                                <option value="">请选择</option>
+                                <option value="无抵押">无抵押</option>
+                                <option value="有抵押">有抵押</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="vehicleFinance">融资余额(万元)</label>
+                        <input type="number" step="0.01" class="form-control" id="vehicleFinance" required>
+                    </div>
+                    <input type="hidden" id="vehicleIndex" value="-1">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="saveVehicleBtn">保存</button>
+                <button class="btn btn-warning" id="cancelVehicleBtn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 数据存储
+            let propertyData = [];
+            let vehicleData = [];
+            
+            // 基本信息数据
+            let basicInfoData = {
+                name: '张三',
+                idCard: '888888888888888888',
+                phone: '18788888888',
+                address: '浙江省杭州市',
+                age: '48岁',
+                gender: '男',
+                education: '本科',
+                isTonglu: '是',
+                hobby: '乒乓球、跑步、K歌',
+                productPreference: '一次性还本付息',
+                marketingPreference: '一对一专属服务',
+                connections: '核心管理层',
+                beijingResource: '企业家',
+                internalPoints: '6个',
+                externalPoints: '8个'
+            };
+            
+            // 基本信息编辑相关
+            const editBasicInfoBtn = document.getElementById('editBasicInfoBtn');
+            const saveBasicInfoBtn = document.getElementById('saveBasicInfoBtn');
+            const cancelBasicInfoBtn = document.getElementById('cancelBasicInfoBtn');
+            const basicInfoGrid = document.getElementById('basicInfoGrid');
+            const basicInfoEditActions = document.getElementById('basicInfoEditActions');
+            
+            // 原始基本信息的备份，用于取消编辑
+            let basicInfoBackup = JSON.parse(JSON.stringify(basicInfoData));
+            
+            // 获取DOM元素
+            // 房产相关
+            const propertyModal = document.getElementById('propertyModal');
+            const propertyModalTitle = document.getElementById('propertyModalTitle');
+            const addPropertyBtn = document.getElementById('addPropertyBtn');
+            const closePropertyModal = document.getElementById('closePropertyModal');
+            const savePropertyBtn = document.getElementById('savePropertyBtn');
+            const cancelPropertyBtn = document.getElementById('cancelPropertyBtn');
+            const propertyForm = document.getElementById('propertyForm');
+            const propertyTableBody = document.getElementById('propertyTableBody');
+            const propertyIndex = document.getElementById('propertyIndex');
+            
+            // 车辆相关
+            const vehicleModal = document.getElementById('vehicleModal');
+            const vehicleModalTitle = document.getElementById('vehicleModalTitle');
+            const addVehicleBtn = document.getElementById('addVehicleBtn');
+            const closeVehicleModal = document.getElementById('closeVehicleModal');
+            const saveVehicleBtn = document.getElementById('saveVehicleBtn');
+            const cancelVehicleBtn = document.getElementById('cancelVehicleBtn');
+            const vehicleForm = document.getElementById('vehicleForm');
+            const vehicleTableBody = document.getElementById('vehicleTableBody');
+            const vehicleIndex = document.getElementById('vehicleIndex');
+            
+            // 进入基本信息编辑状态
+            function enterBasicInfoEditMode() {
+                // 备份当前数据，以便取消时恢复
+                basicInfoBackup = JSON.parse(JSON.stringify(basicInfoData));
+                
+                // 获取所有info-value元素
+                const infoValues = basicInfoGrid.querySelectorAll('.info-value');
+                
+                // 将每个info-value转换为输入框
+                infoValues.forEach(infoValue => {
+                    const field = infoValue.getAttribute('data-field');
+                    const value = infoValue.textContent;
+                    
+                    // 创建特殊输入框（性别和是否桐庐系使用下拉框）
+                    if (field === 'gender') {
+                        infoValue.innerHTML = `
+                            <select class="form-control edit-input" data-field="${field}">
+                                <option value="男" ${value === '男' ? 'selected' : ''}>男</option>
+                                <option value="女" ${value === '女' ? 'selected' : ''}>女</option>
+                            </select>
+                        `;
+                    } else if (field === 'isTonglu') {
+                        infoValue.innerHTML = `
+                            <select class="form-control edit-input" data-field="${field}">
+                                <option value="是" ${value === '是' ? 'selected' : ''}>是</option>
+                                <option value="否" ${value === '否' ? 'selected' : ''}>否</option>
+                            </select>
+                        `;
+                    } else if (field === 'education') {
+                        infoValue.innerHTML = `
+                            <select class="form-control edit-input" data-field="${field}">
+                                <option value="高中" ${value === '高中' ? 'selected' : ''}>高中</option>
+                                <option value="专科" ${value === '专科' ? 'selected' : ''}>专科</option>
+                                <option value="本科" ${value === '本科' ? 'selected' : ''}>本科</option>
+                                <option value="硕士" ${value === '硕士' ? 'selected' : ''}>硕士</option>
+                                <option value="博士" ${value === '博士' ? 'selected' : ''}>博士</option>
+                            </select>
+                        `;
+                    } else {
+                        // 普通文本输入框
+                        infoValue.innerHTML = `<input type="text" class="form-control edit-input" data-field="${field}" value="${value}">`;
+                    }
+                });
+                
+                // 添加编辑状态样式
+                basicInfoGrid.querySelectorAll('.info-item').forEach(item => {
+                    item.classList.add('editing');
+                });
+                
+                // 显示保存和取消按钮
+                basicInfoEditActions.style.display = 'block';
+                
+                // 隐藏编辑按钮
+                editBasicInfoBtn.style.display = 'none';
+            }
+            
+            // 退出基本信息编辑状态
+            function exitBasicInfoEditMode(saveChanges = false) {
+                if (saveChanges) {
+                    // 保存所有输入的值
+                    const editInputs = basicInfoGrid.querySelectorAll('.edit-input');
+                    editInputs.forEach(input => {
+                        const field = input.getAttribute('data-field');
+                        basicInfoData[field] = input.value;
+                    });
+                    
+                    // 显示成功通知
+                    showNotification('实控人基本信息已更新！', 'success');
+                } else {
+                    // 恢复备份的数据
+                    basicInfoData = JSON.parse(JSON.stringify(basicInfoBackup));
+                }
+                
+                // 更新显示
+                updateBasicInfo();
+                
+                // 移除编辑状态样式
+                basicInfoGrid.querySelectorAll('.info-item').forEach(item => {
+                    item.classList.remove('editing');
+                });
+                
+                // 隐藏保存和取消按钮
+                basicInfoEditActions.style.display = 'none';
+                
+                // 显示编辑按钮
+                editBasicInfoBtn.style.display = 'inline-flex';
+            }
+            
+            // 更新基本信息显示
+            function updateBasicInfo() {
+                // 获取所有info-value元素
+                const infoValues = basicInfoGrid.querySelectorAll('.info-value');
+                
+                // 更新每个值的显示
+                infoValues.forEach(infoValue => {
+                    const field = infoValue.getAttribute('data-field');
+                    infoValue.textContent = basicInfoData[field];
+                });
+            }
+            
+            // 基本信息编辑按钮点击事件
+            editBasicInfoBtn.addEventListener('click', function() {
+                enterBasicInfoEditMode();
+            });
+            
+            // 保存基本信息按钮点击事件
+            saveBasicInfoBtn.addEventListener('click', function() {
+                exitBasicInfoEditMode(true);
+            });
+            
+            // 取消基本信息编辑按钮点击事件
+            cancelBasicInfoBtn.addEventListener('click', function() {
+                exitBasicInfoEditMode(false);
+            });
+            
+            // 生成随机房产数据
+            function generateRandomPropertyData() {
+                const propertyTypes = ['住宅', '商铺', '写字楼', '厂房', '其他'];
+                const cities = ['杭州市', '宁波市', '温州市', '绍兴市', '嘉兴市', '湖州市', '金华市'];
+                const districts = ['西湖区', '滨江区', '余杭区', '拱墅区', '上城区', '下城区', '江干区'];
+                const streets = ['文一路', '文二路', '文三路', '莫干山路', '教工路', '余杭塘路', '古墩路'];
+                
+                for (let i = 0; i < 3; i++) {
+                    const propertyType = propertyTypes[Math.floor(Math.random() * propertyTypes.length)];
+                    const area = Math.floor(Math.random() * 200) + 50; // 50-250平方米
+                    const price = (Math.random() * 500 + 100).toFixed(2); // 100-600万元
+                    const year = Math.floor(Math.random() * 20) + 2000; // 2000-2020年
+                    const city = cities[Math.floor(Math.random() * cities.length)];
+                    const district = districts[Math.floor(Math.random() * districts.length)];
+                    const street = streets[Math.floor(Math.random() * streets.length)];
+                    const address = `浙江省${city}${district}${street}${Math.floor(Math.random() * 100) + 1}号`;
+                    const isOwner = Math.random() > 0.5 ? '是' : '否';
+                    const mortgage = Math.random() > 0.5 ? '无抵押' : '有抵押';
+                    const finance = mortgage === '有抵押' ? (Math.random() * 100 + 50).toFixed(2) : '0.00';
+                    
+                    propertyData.push({
+                        type: propertyType,
+                        area: area,
+                        price: price,
+                        year: year,
+                        address: address,
+                        isOwner: isOwner,
+                        mortgage: mortgage,
+                        finance: finance
+                    });
+                }
+            }
+            
+            // 生成随机车辆数据
+            function generateRandomVehicleData() {
+                const brands = ['奔驰', '宝马', '奥迪', '保时捷', '特斯拉', '丰田', '本田', '大众'];
+                const series = {
+                    '奔驰': ['S级', 'E级', 'C级', 'GLC', 'GLE', 'GLS'],
+                    '宝马': ['7系', '5系', '3系', 'X5', 'X3', 'X1'],
+                    '奥迪': ['A8', 'A6', 'A4', 'Q7', 'Q5', 'Q3'],
+                    '保时捷': ['911', '718', 'Cayenne', 'Macan', 'Panamera', 'Taycan'],
+                    '特斯拉': ['Model S', 'Model 3', 'Model X', 'Model Y'],
+                    '丰田': ['凯美瑞', '卡罗拉', '汉兰达', '普拉多', '雷凌', '亚洲龙'],
+                    '本田': ['雅阁', '思域', 'CR-V', '冠道', '飞度', '奥德赛'],
+                    '大众': ['帕萨特', '速腾', '途观', '途昂', '高尔夫', '迈腾']
+                };
+                
+                for (let i = 0; i < 2; i++) {
+                    const brand = brands[Math.floor(Math.random() * brands.length)];
+                    const serie = series[brand][Math.floor(Math.random() * series[brand].length)];
+                    const year = Math.floor(Math.random() * 10) + 2010; // 2010-2020年
+                    const price = (Math.random() * 80 + 20).toFixed(2); // 20-100万元
+                    const isOwner = Math.random() > 0.5 ? '是' : '否';
+                    const mortgage = Math.random() > 0.5 ? '无抵押' : '有抵押';
+                    const finance = mortgage === '有抵押' ? (Math.random() * 30 + 10).toFixed(2) : '0.00';
+                    
+                    vehicleData.push({
+                        brand: brand,
+                        series: serie,
+                        year: year,
+                        price: price,
+                        isOwner: isOwner,
+                        mortgage: mortgage,
+                        finance: finance
+                    });
+                }
+            }
+            
+            // 更新房产信息表格
+            function updatePropertyTable() {
+                propertyTableBody.innerHTML = '';
+                
+                propertyData.forEach((property, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${property.type}</td>
+                        <td>${property.area}</td>
+                        <td>${property.price}</td>
+                        <td>${property.year}</td>
+                        <td>${property.address}</td>
+                        <td>${property.isOwner}</td>
+                        <td>${property.mortgage}</td>
+                        <td>${property.finance}</td>
+                        <td class="actions">
+                            <button class="btn btn-primary btn-sm edit-property-btn" data-index="${index}">修改</button>
+                        </td>
+                    `;
+                    propertyTableBody.appendChild(row);
+                });
+                
+                // 添加修改按钮点击事件
+                document.querySelectorAll('.edit-property-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        editProperty(index);
+                    });
+                });
+            }
+            
+            // 更新车辆信息表格
+            function updateVehicleTable() {
+                vehicleTableBody.innerHTML = '';
+                
+                vehicleData.forEach((vehicle, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${vehicle.brand}</td>
+                        <td>${vehicle.series}</td>
+                        <td>${vehicle.year}</td>
+                        <td>${vehicle.price}</td>
+                        <td>${vehicle.isOwner}</td>
+                        <td>${vehicle.mortgage}</td>
+                        <td>${vehicle.finance}</td>
+                        <td class="actions">
+                            <button class="btn btn-primary btn-sm edit-vehicle-btn" data-index="${index}">修改</button>
+                        </td>
+                    `;
+                    vehicleTableBody.appendChild(row);
+                });
+                
+                // 添加修改按钮点击事件
+                document.querySelectorAll('.edit-vehicle-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        editVehicle(index);
+                    });
+                });
+            }
+            
+            // 编辑房产信息
+            function editProperty(index) {
+                const property = propertyData[index];
+                
+                // 设置表单值
+                document.getElementById('propertyType').value = property.type;
+                document.getElementById('propertyArea').value = property.area;
+                document.getElementById('propertyPrice').value = property.price;
+                document.getElementById('propertyYear').value = property.year;
+                document.getElementById('propertyAddress').value = property.address;
+                document.getElementById('propertyOwner').value = property.isOwner;
+                document.getElementById('propertyMortgage').value = property.mortgage;
+                document.getElementById('propertyFinance').value = property.finance;
+                propertyIndex.value = index;
+                
+                // 更改模态框标题
+                propertyModalTitle.textContent = '修改房产信息';
+                
+                // 显示模态框
+                propertyModal.classList.add('active');
+            }
+            
+            // 编辑车辆信息
+            function editVehicle(index) {
+                const vehicle = vehicleData[index];
+                
+                // 设置表单值
+                document.getElementById('vehicleBrand').value = vehicle.brand;
+                document.getElementById('vehicleSeries').value = vehicle.series;
+                document.getElementById('vehicleYear').value = vehicle.year;
+                document.getElementById('vehiclePrice').value = vehicle.price;
+                document.getElementById('vehicleOwner').value = vehicle.isOwner;
+                document.getElementById('vehicleMortgage').value = vehicle.mortgage;
+                document.getElementById('vehicleFinance').value = vehicle.finance;
+                vehicleIndex.value = index;
+                
+                // 更改模态框标题
+                vehicleModalTitle.textContent = '修改车辆信息';
+                
+                // 显示模态框
+                vehicleModal.classList.add('active');
+            }
+            
+            // 重置房产信息表单
+            function resetPropertyForm() {
+                propertyForm.reset();
+                propertyIndex.value = -1;
+                propertyModalTitle.textContent = '添加房产信息';
+            }
+            
+            // 重置车辆信息表单
+            function resetVehicleForm() {
+                vehicleForm.reset();
+                vehicleIndex.value = -1;
+                vehicleModalTitle.textContent = '添加车辆信息';
+            }
+            
+            // 显示通知
+            function showNotification(message, type) {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                // 显示通知
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 10);
+                
+                // 2秒后隐藏通知
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 2000);
+            }
+            
+            // 添加房产按钮点击事件
+            addPropertyBtn.addEventListener('click', function() {
+                resetPropertyForm();
+                propertyModal.classList.add('active');
+            });
+            
+            // 关闭房产模态框
+            closePropertyModal.addEventListener('click', function() {
+                propertyModal.classList.remove('active');
+            });
+            
+            cancelPropertyBtn.addEventListener('click', function() {
+                propertyModal.classList.remove('active');
+            });
+            
+            // 保存房产信息
+            savePropertyBtn.addEventListener('click', function() {
+                if (!propertyForm.checkValidity()) {
+                    propertyForm.reportValidity();
+                    return;
+                }
+                
+                const property = {
+                    type: document.getElementById('propertyType').value,
+                    area: document.getElementById('propertyArea').value,
+                    price: document.getElementById('propertyPrice').value,
+                    year: document.getElementById('propertyYear').value,
+                    address: document.getElementById('propertyAddress').value,
+                    isOwner: document.getElementById('propertyOwner').value,
+                    mortgage: document.getElementById('propertyMortgage').value,
+                    finance: document.getElementById('propertyFinance').value
+                };
+                
+                const index = parseInt(propertyIndex.value);
+                
+                if (index >= 0) {
+                    // 修改现有房产信息
+                    propertyData[index] = property;
+                    showNotification('房产信息修改成功！', 'success');
+                } else {
+                    // 添加新房产信息
+                    propertyData.push(property);
+                    showNotification('房产信息添加成功！', 'success');
+                }
+                
+                // 更新表格
+                updatePropertyTable();
+                
+                // 关闭模态框
+                propertyModal.classList.remove('active');
+            });
+            
+            // 添加车辆按钮点击事件
+            addVehicleBtn.addEventListener('click', function() {
+                resetVehicleForm();
+                vehicleModal.classList.add('active');
+            });
+            
+            // 关闭车辆模态框
+            closeVehicleModal.addEventListener('click', function() {
+                vehicleModal.classList.remove('active');
+            });
+            
+            cancelVehicleBtn.addEventListener('click', function() {
+                vehicleModal.classList.remove('active');
+            });
+            
+            // 保存车辆信息
+            saveVehicleBtn.addEventListener('click', function() {
+                if (!vehicleForm.checkValidity()) {
+                    vehicleForm.reportValidity();
+                    return;
+                }
+                
+                const vehicle = {
+                    brand: document.getElementById('vehicleBrand').value,
+                    series: document.getElementById('vehicleSeries').value,
+                    year: document.getElementById('vehicleYear').value,
+                    price: document.getElementById('vehiclePrice').value,
+                    isOwner: document.getElementById('vehicleOwner').value,
+                    mortgage: document.getElementById('vehicleMortgage').value,
+                    finance: document.getElementById('vehicleFinance').value
+                };
+                
+                const index = parseInt(vehicleIndex.value);
+                
+                if (index >= 0) {
+                    // 修改现有车辆信息
+                    vehicleData[index] = vehicle;
+                    showNotification('车辆信息修改成功！', 'success');
+                } else {
+                    // 添加新车辆信息
+                    vehicleData.push(vehicle);
+                    showNotification('车辆信息添加成功！', 'success');
+                }
+                
+                // 更新表格
+                updateVehicleTable();
+                
+                // 关闭模态框
+                vehicleModal.classList.remove('active');
+            });
+            
+            // 初始化页面
+            generateRandomPropertyData();
+            generateRandomVehicleData();
+            updatePropertyTable();
+            updateVehicleTable();
+        });
+    </script>
+</body>
+</html> 

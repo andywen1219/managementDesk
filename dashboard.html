@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>驾驶舱 - 互联网小贷公司管理台系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #653EB3;
+            --success-color: #3BB950;
+            --danger-color: #F35252;
+            --warning-color: #E6A733;
+            --orange-color: #F28335;
+            --gray-color: #666;
+            --white: #fff;
+            --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .dashboard-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .dashboard-card {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+        }
+
+        .dashboard-card h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .dashboard-stats {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--gray-color);
+        }
+
+        .dashboard-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .dashboard-row .dashboard-card {
+            flex: 1;
+        }
+
+        .chart-container {
+            height: 250px;
+            position: relative;
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .task-title {
+            font-weight: 500;
+        }
+
+        .task-deadline {
+            color: var(--gray-color);
+            font-size: 14px;
+        }
+
+        .task-priority {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .task-priority.high {
+            background: #ffebee;
+            color: var(--danger-color);
+        }
+
+        .task-priority.medium {
+            background: #fff3e0;
+            color: var(--warning-color);
+        }
+
+        .task-priority.low {
+            background: #e8f5e9;
+            color: var(--success-color);
+        }
+
+        .view-more {
+            text-align: center;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 10px;
+            font-weight: 500;
+        }
+
+        .notification-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .notification-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .notification-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .notification-icon.warning {
+            background: #fff3e0;
+            color: var(--warning-color);
+        }
+
+        .notification-icon.alert {
+            background: #ffebee;
+            color: var(--danger-color);
+        }
+
+        .notification-icon.info {
+            background: #e3f2fd;
+            color: var(--primary-color);
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 500;
+        }
+
+        .notification-time {
+            font-size: 12px;
+            color: var(--gray-color);
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-row {
+                flex-direction: column;
+            }
+            
+            .dashboard-stats {
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+            
+            .stat-item {
+                flex: 1 1 calc(50% - 10px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-card">
+            <h3>业务概况</h3>
+            <div class="dashboard-stats">
+                <div class="stat-item">
+                    <div class="stat-value">¥ 1,256,789</div>
+                    <div class="stat-label">贷款余额(元)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">3,278</div>
+                    <div class="stat-label">客户总数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">245</div>
+                    <div class="stat-label">今日新增客户</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">97.8%</div>
+                    <div class="stat-label">还款率</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-row">
+            <div class="dashboard-card">
+                <h3>贷款趋势</h3>
+                <div class="chart-container" id="loan-trend-chart">
+                    <canvas id="loanTrendChart"></canvas>
+                </div>
+            </div>
+            <div class="dashboard-card">
+                <h3>客户分布</h3>
+                <div class="chart-container" id="customer-distribution-chart">
+                    <canvas id="customerDistributionChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-row">
+            <div class="dashboard-card">
+                <h3>待办任务</h3>
+                <div class="task-list">
+                    <div class="task-item">
+                        <div class="task-title">客户信用评估</div>
+                        <div class="task-deadline">今日 14:30</div>
+                        <div class="task-priority high">高</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-title">风险客户回访</div>
+                        <div class="task-deadline">今日 16:00</div>
+                        <div class="task-priority medium">中</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-title">贷款审批</div>
+                        <div class="task-deadline">明日 10:00</div>
+                        <div class="task-priority low">低</div>
+                    </div>
+                    <div class="view-more">查看更多</div>
+                </div>
+            </div>
+            <div class="dashboard-card">
+                <h3>重要提醒</h3>
+                <div class="notification-list">
+                    <div class="notification-item">
+                        <div class="notification-icon warning">⚠️</div>
+                        <div class="notification-content">
+                            <div class="notification-title">5名客户即将逾期</div>
+                            <div class="notification-time">30分钟前</div>
+                        </div>
+                    </div>
+                    <div class="notification-item">
+                        <div class="notification-icon alert">🔔</div>
+                        <div class="notification-content">
+                            <div class="notification-title">新的贷款申请待审批</div>
+                            <div class="notification-time">1小时前</div>
+                        </div>
+                    </div>
+                    <div class="notification-item">
+                        <div class="notification-icon info">ℹ️</div>
+                        <div class="notification-content">
+                            <div class="notification-title">系统更新提醒</div>
+                            <div class="notification-time">2小时前</div>
+                        </div>
+                    </div>
+                    <div class="view-more">查看更多</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟数据
+        const mockData = {
+            loanTrend: {
+                labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+                datasets: [
+                    {
+                        label: '贷款发放金额',
+                        data: [150, 220, 180, 270, 310, 290, 380, 320, 290, 350, 410, 320],
+                        borderColor: '#653EB3',
+                        backgroundColor: 'rgba(101, 62, 179, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: '贷款回收金额',
+                        data: [100, 170, 150, 210, 250, 230, 300, 270, 240, 290, 330, 280],
+                        borderColor: '#F35252',
+                        backgroundColor: 'rgba(243, 82, 82, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }
+                ]
+            },
+            customerDistribution: {
+                labels: ['优质客户', '标准客户', '风险客户', '黑名单客户', '新客户'],
+                datasets: [{
+                    data: [35, 45, 12, 3, 5],
+                    backgroundColor: [
+                        '#3BB950',
+                        '#56A0B0',
+                        '#E6A733',
+                        '#F35252',
+                        '#F28335'
+                    ],
+                    hoverOffset: 4
+                }]
+            }
+        };
+
+        // 图表配置
+        const chartConfigs = {
+            loanTrend: {
+                type: 'line',
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '金额（万元）'
+                            }
+                        }
+                    }
+                }
+            },
+            customerDistribution: {
+                type: 'doughnut',
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        }
+                    }
+                }
+            }
+        };
+
+        // 初始化图表
+        function initCharts() {
+            // 贷款趋势图
+            const loanTrendCtx = document.getElementById('loanTrendChart').getContext('2d');
+            new Chart(loanTrendCtx, {
+                ...chartConfigs.loanTrend,
+                data: mockData.loanTrend
+            });
+
+            // 客户分布图
+            const customerDistCtx = document.getElementById('customerDistributionChart').getContext('2d');
+            new Chart(customerDistCtx, {
+                ...chartConfigs.customerDistribution,
+                data: mockData.customerDistribution
+            });
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            
+            // 添加查看更多按钮点击事件
+            document.querySelectorAll('.view-more').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    alert('查看更多功能开发中...');
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

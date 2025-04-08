@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消息中心</title>
+    <style>
+        /* 全局样式 */
+        :root {
+            --primary-color: #653EB3;
+            --primary-light: #8C6FD2;
+            --primary-dark: #4C2D99;
+            --danger-color: #F35252;
+            --warning-color: #E6A733;
+            --success-color: #3BB950;
+            --orange-color: #F28335;
+            --deep-purple: #6D2763;
+            --teal-color: #56A0B0;
+            --gray-color: #838383;
+            --light-gray: #E0E0E0;
+            --white: #FFFFFF;
+            --black: #333333;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background-color: #F5F5F5;
+            color: var(--black);
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+
+        /* 消息中心样式 */
+        .message-center {
+            display: flex;
+            flex-direction: column;
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .message-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .message-filters {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 14px;
+            color: var(--gray-color);
+        }
+
+        .form-select {
+            padding: 8px 12px;
+            border: 1px solid var(--light-gray);
+            border-radius: 4px;
+            font-size: 14px;
+            min-width: 150px;
+            background-color: var(--white);
+        }
+
+        .search-button {
+            padding: 8px 15px;
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .search-button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .message-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message-item {
+            display: flex;
+            background-color: #F8F8F8;
+            border-radius: 8px;
+            padding: 15px;
+            gap: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .message-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-item.unread {
+            background-color: rgba(101, 62, 179, 0.05);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .message-icon {
+            font-size: 24px;
+            margin-right: 5px;
+        }
+
+        .message-icon.alert {
+            color: var(--danger-color);
+        }
+
+        .message-icon.task {
+            color: var(--orange-color);
+        }
+
+        .message-icon.system {
+            color: var(--teal-color);
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .message-title {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .message-time {
+            color: var(--gray-color);
+            font-size: 14px;
+        }
+
+        .message-body {
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--black);
+        }
+
+        /* 分页样式 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .page-button {
+            padding: 8px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: 4px;
+            background-color: var(--white);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-button:hover {
+            background-color: var(--primary-light);
+            color: var(--white);
+            border-color: var(--primary-light);
+        }
+
+        .page-numbers {
+            display: flex;
+            gap: 10px;
+        }
+
+        .page-number {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-number:hover {
+            background-color: rgba(101, 62, 179, 0.1);
+        }
+
+        .page-number.active {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        /* 响应式调整 - 消息中心 */
+        @media (max-width: 768px) {
+            .message-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .message-filters {
+                width: 100%;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+
+            .message-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .message-icon {
+                margin-bottom: 10px;
+            }
+
+            .message-header-row {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 80%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .modal-header h2 {
+            font-size: 18px;
+            color: var(--primary-color);
+        }
+
+        .close-modal {
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray-color);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* 通知徽章样式 */
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: var(--danger-color);
+            color: var(--white);
+            font-size: 12px;
+            font-weight: bold;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <h1>消息中心系统</h1>
+    
+    <!-- 页面内容将通过JavaScript加载 -->
+    <div id="message-container"></div>
+
+    <!-- 消息详情模态框 -->
+    <div class="modal" id="messageDetailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>消息详情</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <!-- 消息详情内容将通过JavaScript动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载消息中心页面内容
+            loadMessagePage();
+            
+            // 初始化模态框
+            initModals();
+        });
+
+        /**
+         * 初始化模态框功能
+         */
+        function initModals() {
+            // 关闭按钮
+            const closeButtons = document.querySelectorAll('.close-modal');
+            closeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const modal = this.closest('.modal');
+                    closeModal(modal);
+                });
+            });
+            
+            // 点击模态框外部关闭
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeModal(this);
+                    }
+                });
+            });
+        }
+
+        /**
+         * 打开模态框
+         * @param {HTMLElement} modal - 要打开的模态框元素
+         */
+        function openModal(modal) {
+            if (typeof modal === 'string') {
+                modal = document.getElementById(modal);
+            }
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // 防止背景滚动
+        }
+
+        /**
+         * 关闭模态框
+         * @param {HTMLElement} modal - 要关闭的模态框元素
+         */
+        function closeModal(modal) {
+            if (typeof modal === 'string') {
+                modal = document.getElementById(modal);
+            }
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        /**
+         * 加载消息中心页面内容
+         */
+        function loadMessagePage() {
+            const container = document.getElementById('message-container');
+            
+            container.innerHTML = `
+                <div class="message-center">
+                    <div class="message-header">
+                        <h2>消息中心</h2>
+                        <div class="message-filters">
+                            <div class="filter-group">
+                                <label>消息类型</label>
+                                <select class="form-select" id="message-type-filter">
+                                    <option value="all">全部消息</option>
+                                    <option value="system">系统消息</option>
+                                    <option value="task">任务提醒</option>
+                                    <option value="alert">风险提醒</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>时间范围</label>
+                                <select class="form-select" id="message-time-filter">
+                                    <option value="today">今日</option>
+                                    <option value="week">近7天</option>
+                                    <option value="month" selected>近30天</option>
+                                    <option value="all">全部</option>
+                                </select>
+                            </div>
+                            <button class="search-button" id="filter-messages-btn">筛选</button>
+                        </div>
+                    </div>
+                    
+                    <div class="message-list">
+                        <div class="message-item unread" data-id="1" data-type="alert">
+                            <div class="message-icon alert">🔔</div>
+                            <div class="message-content">
+                                <div class="message-header-row">
+                                    <div class="message-title">贷款逾期提醒</div>
+                                    <div class="message-time">今日 10:30</div>
+                                </div>
+                                <div class="message-body">
+                                    杭州AA电子商务有限公司的贷款账户将在3天后逾期，请及时联系客户处理。
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="message-item unread" data-id="2" data-type="task">
+                            <div class="message-icon task">📝</div>
+                            <div class="message-content">
+                                <div class="message-header-row">
+                                    <div class="message-title">任务截止提醒</div>
+                                    <div class="message-time">今日 09:15</div>
+                                </div>
+                                <div class="message-body">
+                                    您有一个"客户信用评估"任务将在今日14:30截止，请及时处理。
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="message-item" data-id="3" data-type="system">
+                            <div class="message-icon system">ℹ️</div>
+                            <div class="message-content">
+                                <div class="message-header-row">
+                                    <div class="message-title">系统更新通知</div>
+                                    <div class="message-time">昨日 15:45</div>
+                                </div>
+                                <div class="message-body">
+                                    系统将于2023年6月18日凌晨2:00-4:00进行版本更新，期间系统可能无法访问，请提前做好相关工作安排。
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="message-item" data-id="4" data-type="alert">
+                            <div class="message-icon alert">⚠️</div>
+                            <div class="message-content">
+                                <div class="message-header-row">
+                                    <div class="message-title">风险预警</div>
+                                    <div class="message-time">2023-06-13 11:20</div>
+                                </div>
+                                <div class="message-body">
+                                    系统检测到宁波YY贸易有限公司近期银行流水异常，请关注客户经营状况变化。
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="message-item" data-id="5" data-type="task">
+                            <div class="message-icon task">✅</div>
+                            <div class="message-content">
+                                <div class="message-header-row">
+                                    <div class="message-title">任务完成通知</div>
+                                    <div class="message-time">2023-06-12 16:30</div>
+                                </div>
+                                <div class="message-body">
+                                    您分配给王客户经理的"合同审核"任务已完成。
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pagination">
+                        <button class="page-button prev-button">上一页</button>
+                        <div class="page-numbers">
+                            <span class="page-number active">1</span>
+                            <span class="page-number">2</span>
+                            <span class="page-number">3</span>
+                        </div>
+                        <button class="page-button next-button">下一页</button>
+                    </div>
+                </div>
+            `;
+            
+            // 绑定消息中心事件
+            bindMessageEvents();
+            
+            // 更新未读消息数量
+            updateNotificationBadge();
+        }
+
+        /**
+         * 绑定消息中心的事件
+         */
+        function bindMessageEvents() {
+            // 获取所有消息项目
+            const messageItems = document.querySelectorAll('.message-item');
+            
+            // 为每个消息项目添加点击事件
+            messageItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const messageId = item.getAttribute('data-id');
+                    // 打开消息详情（此处仅做标记为已读处理）
+                    markMessageAsRead(item);
+                    // 打开消息详情模态框
+                    openMessageDetailModal(messageId);
+                });
+            });
+            
+            // 筛选按钮点击事件
+            const filterBtn = document.getElementById('filter-messages-btn');
+            if (filterBtn) {
+                filterBtn.addEventListener('click', filterMessages);
+            }
+            
+            // 分页按钮事件
+            const prevButton = document.querySelector('.pagination .prev-button');
+            const nextButton = document.querySelector('.pagination .next-button');
+            const pageNumbers = document.querySelectorAll('.pagination .page-number');
+            
+            if (prevButton) {
+                prevButton.addEventListener('click', () => {
+                    alert('上一页功能将在未来版本实现');
+                });
+            }
+            
+            if (nextButton) {
+                nextButton.addEventListener('click', () => {
+                    alert('下一页功能将在未来版本实现');
+                });
+            }
+            
+            if (pageNumbers.length) {
+                pageNumbers.forEach(pageNum => {
+                    pageNum.addEventListener('click', () => {
+                        // 移除当前激活状态
+                        document.querySelector('.pagination .page-number.active').classList.remove('active');
+                        // 设置新的激活页码
+                        pageNum.classList.add('active');
+                        // 实际应用中应该这里加载对应页面的数据
+                        alert(`将加载第${pageNum.textContent}页的内容`);
+                    });
+                });
+            }
+        }
+
+        /**
+         * 标记消息为已读
+         * @param {Element} messageItem 消息元素
+         */
+        function markMessageAsRead(messageItem) {
+            if (messageItem.classList.contains('unread')) {
+                messageItem.classList.remove('unread');
+                // 实际应用中应该发送请求到服务器，更新消息状态
+                
+                // 更新通知徽章
+                updateNotificationBadge();
+            }
+        }
+
+        /**
+         * 打开消息详情模态框
+         * @param {string} messageId 消息ID
+         */
+        function openMessageDetailModal(messageId) {
+            // 获取当前消息内容
+            const messageItem = document.querySelector(`.message-item[data-id="${messageId}"]`);
+            if (!messageItem) return;
+            
+            const title = messageItem.querySelector('.message-title').textContent;
+            const time = messageItem.querySelector('.message-time').textContent;
+            const body = messageItem.querySelector('.message-body').textContent;
+            const type = messageItem.getAttribute('data-type');
+            
+            let icon = '';
+            if (type === 'alert') {
+                icon = '🔔';
+            } else if (type === 'task') {
+                icon = '📝';
+            } else if (type === 'system') {
+                icon = 'ℹ️';
+            }
+            
+            // 设置模态框内容
+            const modal = document.getElementById('messageDetailModal');
+            const modalTitle = modal.querySelector('.modal-header h2');
+            const modalBody = modal.querySelector('.modal-body');
+            
+            modalTitle.textContent = title;
+            modalBody.innerHTML = `
+                <div class="message-detail">
+                    <div class="message-detail-header">
+                        <div class="message-detail-icon ${type}">${icon}</div>
+                        <div class="message-detail-time">${time}</div>
+                    </div>
+                    <div class="message-detail-body">
+                        ${body}
+                    </div>
+                    <div class="message-detail-footer">
+                        <p>消息类型: ${type === 'alert' ? '风险提醒' : type === 'task' ? '任务提醒' : '系统消息'}</p>
+                        <p>消息ID: ${messageId}</p>
+                        <p>状态: 已读</p>
+                    </div>
+                </div>
+            `;
+            
+            // 打开模态框
+            openModal(modal);
+        }
+
+        /**
+         * 筛选消息
+         */
+        function filterMessages() {
+            const typeFilter = document.getElementById('message-type-filter').value;
+            const timeFilter = document.getElementById('message-time-filter').value;
+            
+            const messageItems = document.querySelectorAll('.message-item');
+            
+            // 应用筛选逻辑
+            messageItems.forEach(item => {
+                const messageType = item.getAttribute('data-type');
+                
+                // 类型筛选
+                let showByType = typeFilter === 'all' || messageType === typeFilter;
+                
+                // 在实际应用中，这里应该根据时间进行筛选
+                // 此处简化处理，仅根据类型筛选
+                
+                // 设置显示或隐藏
+                if (showByType) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // 显示筛选结果提示
+            const typeText = document.getElementById('message-type-filter').options[document.getElementById('message-type-filter').selectedIndex].text;
+            const timeText = document.getElementById('message-time-filter').options[document.getElementById('message-time-filter').selectedIndex].text;
+            
+            alert(`已筛选: 类型(${typeText}), 时间范围(${timeText})`);
+        }
+
+        /**
+         * 更新通知徽章，显示未读消息数量
+         */
+        function updateNotificationBadge() {
+            // 获取未读消息数量
+            const unreadCount = document.querySelectorAll('.message-item.unread').length;
+            
+            // 如果有未读消息，添加在页面标题中显示
+            if (unreadCount > 0) {
+                document.title = `(${unreadCount}) 消息中心`;
+            } else {
+                document.title = '消息中心';
+            }
+        }
+    </script>
+</body>
+</html>

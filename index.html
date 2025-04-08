@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互联网小贷公司管理台系统</title>
+    <style>
+        /* 全局样式 */
+        :root {
+            --primary-color: #653EB3;
+            --primary-light: #8C6FD2;
+            --primary-dark: #4C2D99;
+            --danger-color: #F35252;
+            --warning-color: #E6A733;
+            --success-color: #3BB950;
+            --orange-color: #F28335;
+            --deep-purple: #6D2763;
+            --teal-color: #56A0B0;
+            --gray-color: #838383;
+            --light-gray: #E0E0E0;
+            --white: #FFFFFF;
+            --black: #333333;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background-color: #F5F5F5;
+            color: var(--black);
+        }
+
+        /* 布局 */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 220px;
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 20px 0;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .logo h2 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .nav-menu ul {
+            list-style: none;
+        }
+
+        .nav-menu li {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .nav-menu li:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .nav-menu li.active {
+            background-color: var(--primary-dark);
+            border-left: 4px solid var(--white);
+        }
+
+        .nav-menu .icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        /* 添加二级菜单样式 */
+        .nav-menu li.has-submenu {
+            flex-direction: column;
+            align-items: flex-start;
+            padding-bottom: 0;
+        }
+        
+        .nav-menu li.has-submenu > span {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        
+        .submenu {
+            width: 100%;
+            padding-left: 20px !important;
+            margin-top: 5px;
+            display: none; /* 默认隐藏二级菜单 */
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        /* 当父菜单项有open类时显示子菜单 */
+        .nav-menu li.has-submenu.open .submenu {
+            display: block;
+        }
+        
+        /* 添加展开指示图标 */
+        .nav-menu li.has-submenu > span::after {
+            content: '▼';
+            font-size: 10px;
+            margin-left: auto;
+            transition: transform 0.3s;
+        }
+        
+        .nav-menu li.has-submenu.open > span::after {
+            transform: rotate(180deg);
+        }
+        
+        .submenu li {
+            padding: 8px 0 8px 10px;
+            font-size: 14px;
+        }
+        
+        .submenu li:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        .submenu li.active {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-left: 2px solid var(--white);
+        }
+        
+        .submenu .icon {
+            font-size: 14px;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-left: 220px; /* 与侧边栏宽度相同 */
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* 顶部导航栏 */
+        .top-header {
+            height: 60px;
+            background-color: var(--white);
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 50;
+        }
+
+        .page-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .notification, .user-avatar {
+            margin-right: 15px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        /* 通知徽章样式 */
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: var(--danger-color);
+            color: var(--white);
+            font-size: 12px;
+            font-weight: bold;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        /* 内容容器 */
+        .content-container {
+            display: none;
+        }
+
+        /* iframe 相关样式 */
+        .content-iframe {
+            width: 100%;
+            height: calc(100vh - 60px); /* 减去顶部导航高度 */
+            border: none;
+            background-color: #f5f5f5;
+        }
+
+        /* 响应式设计 - 折叠侧边栏 */
+        .sidebar-collapsed .sidebar {
+            width: 60px;
+        }
+
+        .sidebar-collapsed .logo h2,
+        .sidebar-collapsed .nav-menu li span:not(.icon) {
+            display: none;
+        }
+
+        .sidebar-collapsed .nav-menu .icon {
+            margin-right: 0;
+        }
+
+        .sidebar-collapsed .main-content {
+            margin-left: 60px;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        /* 媒体查询 */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+            
+            .logo h2,
+            .nav-menu li span:not(.icon) {
+                display: none;
+            }
+            
+            .nav-menu .icon {
+                margin-right: 0;
+            }
+            
+            .main-content {
+                margin-left: 60px;
+            }
+            
+            .sidebar-collapsed .sidebar {
+                width: 0;
+                padding: 0;
+            }
+            
+            .sidebar-collapsed .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边导航栏 -->
+        <div class="sidebar">
+            <div class="logo">
+                <h2>小贷管理台</h2>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li class="active" data-page="dashboard"><span class="icon">📊</span> 驾驶舱</li>
+                    <li data-page="customer"><span class="icon">👥</span> 客户管理</li>
+                    <li data-page="marketing" class="has-submenu">
+                        <span><span class="icon">🎯</span> 营销管理</span>
+                        <ul class="submenu">
+                            <li data-page="marketing-activity"><span class="icon">📢</span> 营销活动</li>
+                            <li data-page="customer-maintenance"><span class="icon">👤</span> 客户维护</li>
+                        </ul>
+                    </li>
+                    <li data-page="task"><span class="icon">📝</span> 任务管理</li>
+                    <li data-page="schedule"><span class="icon">📅</span> 日程管理</li>
+                    <li data-page="report"><span class="icon">📈</span> 数据报表</li>
+                    <li data-page="message"><span class="icon">📨</span> 消息中心</li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- 主内容区域 -->
+        <div class="main-content">
+            <!-- 顶部导航栏 -->
+            <header class="top-header">
+                <button class="menu-toggle" id="menuToggle">☰</button>
+                <div class="page-title">驾驶舱</div>
+                <div class="user-info">
+                    <span class="notification">🔔</span>
+                    <span class="user-avatar">👤</span>
+                    <span class="user-name">管理员</span>
+                </div>
+            </header>
+
+            <!-- iframe 内容区域 -->
+            <iframe id="contentFrame" class="content-iframe" src="dashboard.html" frameborder="0"></iframe>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取菜单项和内容框架
+            const menuItems = document.querySelectorAll('.nav-menu > ul > li');
+            const contentFrame = document.getElementById('contentFrame');
+            const pageTitle = document.querySelector('.page-title');
+            
+            // 菜单项点击事件
+            menuItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    // 如果点击的是带有二级菜单的项且不是点击子菜单项
+                    if (this.classList.contains('has-submenu') && e.target.closest('.submenu') === null) {
+                        // 切换二级菜单的显示状态
+                        this.classList.toggle('open');
+                        return;
+                    }
+                    
+                    // 如果点击的是子菜单，则不处理主菜单点击事件
+                    if (e.target.closest('.submenu')) {
+                        return;
+                    }
+                    
+                    // 移除所有菜单项的活动状态
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    
+                    // 添加当前菜单项的活动状态
+                    this.classList.add('active');
+                    
+                    // 获取页面标识符
+                    const page = this.getAttribute('data-page');
+                    
+                    // 页面映射关系
+                    const pageMapping = {
+                        'dashboard': 'dashboard.html',
+                        'customer': 'customer.html',
+                        'marketing': 'marketing.html',
+                        'task': 'task.html',
+                        'schedule': 'schedule.html',
+                        'report': 'report.html', // 假设未来会添加此页面
+                        'message': 'message.html'
+                    };
+                    
+                    // 更新页面标题
+                    pageTitle.textContent = this.textContent.trim().replace(/^[^\s]+\s+/, '');
+                    
+                    // 更新iframe源 (如果页面存在)
+                    if (pageMapping[page]) {
+                        contentFrame.src = pageMapping[page];
+                    } else {
+                        alert('该功能正在开发中...');
+                    }
+                });
+            });
+            
+            // 为二级菜单项添加点击事件
+            const submenuItems = document.querySelectorAll('.submenu li');
+            submenuItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.stopPropagation(); // 阻止事件冒泡
+                    
+                    // 移除所有二级菜单项的活动状态
+                    submenuItems.forEach(i => i.classList.remove('active'));
+                    
+                    // 添加当前二级菜单项的活动状态
+                    this.classList.add('active');
+                    
+                    // 获取页面标识符
+                    const page = this.getAttribute('data-page');
+                    
+                    // 二级菜单页面映射关系
+                    const submenuPageMapping = {
+                        'marketing-activity': 'marketing.html',
+                        'customer-maintenance': 'customer-maintenance.html'
+                    };
+                    
+                    // 更新页面标题
+                    pageTitle.textContent = this.textContent.trim().replace(/^[^\s]+\s+/, '');
+                    
+                    // 更新iframe源
+                    if (submenuPageMapping[page]) {
+                        contentFrame.src = submenuPageMapping[page];
+                    } else {
+                        alert('该功能正在开发中...');
+                    }
+                });
+            });
+            
+            // 处理菜单切换
+            const menuToggle = document.getElementById('menuToggle');
+            const appContainer = document.querySelector('.app-container');
+            
+            menuToggle.addEventListener('click', function() {
+                appContainer.classList.toggle('sidebar-collapsed');
+            });
+        });
+    </script>
+</body>
+</html> 
