@@ -513,7 +513,7 @@
         function drawCustomerRatingRadarChart(elementId, data) {
             const ctx = document.getElementById(elementId).getContext('2d');
             const radarData = {
-                labels: ['资产水平', '信用历史', '履约能力', '行为偏好', '客户关系'],
+                labels: ['资源能力', '运营能力', '管理能力', '投资能力', '成长能力'],
                 datasets: [{
                     label: '客户评级',
                     data: [data.assetLevel, data.creditHistory, data.performanceCapability, data.behaviorPreference, data.customerRelationship],
