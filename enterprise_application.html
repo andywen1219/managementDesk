@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业接口申请</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f0f0f0;
+            padding: 10px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: clamp(18px, 4vw, 24px);
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+        }
+        .form-group {
+            display: flex;
+            flex-wrap: wrap;
+            border: 1px solid #dee2e6;
+            border-bottom: none;
+            transition: all 0.3s ease;
+        }
+        .form-group:last-child {
+            border-bottom: 1px solid #dee2e6;
+        }
+        label {
+            width: 200px;
+            min-width: 180px;
+            padding: 12px 15px;
+            background-color: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            font-weight: 500;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        .input-wrapper {
+            flex: 1;
+            min-width: 250px;
+            padding: 8px 15px;
+            background-color: white;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+        input[type="text"],
+        input[type="tel"],
+        input[type="url"],
+        select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 2px;
+            font-size: 14px;
+            background-color: white;
+            transition: all 0.3s ease;
+        }
+        input[type="text"]:focus,
+        input[type="tel"]:focus,
+        input[type="url"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #653EB3;
+            box-shadow: 0 0 0 2px rgba(101,62,179,0.15);
+        }
+        .required::after {
+            content: "*";
+            color: #653EB3;
+            margin-left: 4px;
+        }
+        .form-note {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+            margin-left: 10px;
+            width: 100%;
+        }
+        .submit-btn {
+            background-color: #653EB3;
+            color: white;
+            padding: 10px 20px;
+            border: 1px solid #653EB3;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 20px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        .submit-btn:hover {
+            background-color: #4e2e8c;
+            border-color: #4e2e8c;
+            transform: translateY(-1px);
+        }
+        .submit-btn:active {
+            background-color: #3d226a;
+            border-color: #3d226a;
+            transform: translateY(1px);
+        }
+        .submit-wrapper {
+            padding: 0 15px;
+            width: 100%;
+        }
+        .container {
+            border: 1px solid #dee2e6;
+        }
+        .form-group:first-child label {
+            background-color: #ede7f6;
+            color: #653EB3;
+            font-weight: bold;
+        }
+        input[type="text"]:hover,
+        input[type="tel"]:hover,
+        input[type="url"]:hover,
+        select:hover {
+            border-color: #653EB3;
+        }
+
+        /* 响应式设计 */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+            .container {
+                padding: 10px;
+            }
+            .form-group {
+                flex-direction: column;
+            }
+            label {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #dee2e6;
+                padding: 8px 12px;
+            }
+            .input-wrapper {
+                padding: 8px 12px;
+            }
+            .form-note {
+                margin-left: 0;
+            }
+            .submit-wrapper {
+                padding: 0;
+            }
+            .submit-btn {
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .container {
+                padding: 8px;
+            }
+            h1 {
+                font-size: 18px;
+                padding: 8px;
+            }
+            label {
+                font-size: 14px;
+            }
+            input[type="text"],
+            input[type="tel"],
+            input[type="url"],
+            select {
+                font-size: 16px; /* 移动端更好的输入体验 */
+                padding: 10px;
+            }
+            .form-note {
+                font-size: 12px;
+            }
+        }
+
+        /* 打印样式优化 */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                border: none;
+            }
+            .submit-btn {
+                display: none;
+            }
+            .form-group {
+                break-inside: avoid;
+            }
+            input[type="text"],
+            input[type="tel"],
+            input[type="url"],
+            select {
+                border: 1px solid #000;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .form-group {
+            animation: fadeIn 0.3s ease-out;
+        }
+        .form-group:nth-child(2) { animation-delay: 0.1s; }
+        .form-group:nth-child(3) { animation-delay: 0.2s; }
+        .form-group:nth-child(4) { animation-delay: 0.3s; }
+        .form-group:nth-child(5) { animation-delay: 0.4s; }
+        .form-group:nth-child(6) { animation-delay: 0.5s; }
+        .form-group:nth-child(7) { animation-delay: 0.6s; }
+        .form-group:nth-child(8) { animation-delay: 0.7s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>企业接口申请</h1>
+        <form id="enterpriseForm">
+            <div class="form-group">
+                <label class="required" for="managerId">业务经理ID</label>
+                <div class="input-wrapper">
+                    <input type="text" id="managerId" name="managerId" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="required" for="businessLicense">上传营业执照</label>
+                <div class="input-wrapper">
+                    <input type="file" id="businessLicense" name="businessLicense" accept="image/*,.pdf" required>
+                    <div class="form-note">支持图片或PDF格式</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="required" for="companyName">通道方企业名称</label>
+                <div class="input-wrapper">
+                    <input type="text" id="companyName" name="companyName" value="自动反显企业名称" readonly style="background-color:#f5f5f5; color:#888; cursor:not-allowed;">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="required" for="creditCode">统一社会信用代码</label>
+                <div class="input-wrapper">
+                    <input type="text" id="creditCode" name="creditCode" value="自动反显信用代码" readonly style="background-color:#f5f5f5; color:#888; cursor:not-allowed;">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="required" for="ipAddress">外网IP（开通白名单用）</label>
+                <div class="input-wrapper">
+                    <input type="text" id="ipAddress" name="ipAddress" required pattern="^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(,\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})*$" title="请输入正确的IP地址，多个IP用英文逗号分隔">
+                    <div class="form-note">多个IP请用英文逗号分隔</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="required" for="contractMethod">合同签署方式</label>
+                <div class="input-wrapper">
+                    <select id="contractMethod" name="contractMethod" required>
+                        <option value="">请选择</option>
+                        <option value="electronic">电子合同</option>
+                        <option value="paper">纸质合同</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="required" for="contractSupplier">合同供应商</label>
+                <div class="input-wrapper">
+                    <input type="text" id="contractSupplier" name="contractSupplier" required>
+                    <div class="form-note">如上上签、e签宝等</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="required" for="callbackUrl">通道方回调地址</label>
+                <div class="input-wrapper">
+                    <input type="url" id="callbackUrl" name="callbackUrl" required pattern="https?://.+">
+                    <div class="form-note">请输入完整的URL地址，包含https://</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="required" for="contactName">企业联系人姓名</label>
+                <div class="input-wrapper">
+                    <input type="text" id="contactName" name="contactName" required autocomplete="name">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="required" for="contactPhone">联系方式</label>
+                <div class="input-wrapper">
+                    <input type="tel" id="contactPhone" name="contactPhone" required pattern="^1[3-9]\d{9}$" title="请输入正确的手机号码">
+                    <div class="form-note">请输入手机号码</div>
+                </div>
+            </div>
+
+            <div class="submit-wrapper">
+                <button type="submit" class="submit-btn">提交申请</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('enterpriseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 表单验证
+            const form = e.target;
+            const formData = new FormData(form);
+            let isValid = true;
+            let firstInvalidElement = null;
+
+            // 验证所有必填字段
+            for (let [key, value] of formData.entries()) {
+                const input = form.elements[key];
+                if (input.required && !value.trim()) {
+                    isValid = false;
+                    input.style.borderColor = '#dc3545';
+                    if (!firstInvalidElement) firstInvalidElement = input;
+                } else if (input.pattern && !new RegExp(input.pattern).test(value)) {
+                    isValid = false;
+                    input.style.borderColor = '#dc3545';
+                    if (!firstInvalidElement) firstInvalidElement = input;
+                } else {
+                    input.style.borderColor = '#dee2e6';
+                }
+            }
+
+            if (!isValid) {
+                firstInvalidElement.focus();
+                alert('请正确填写所有必填字段！');
+                return;
+            }
+
+            // 模拟表单提交
+            const submitBtn = form.querySelector('.submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '提交中...';
+
+            // 模拟异步提交
+            setTimeout(() => {
+                alert('表单提交成功！');
+                submitBtn.disabled = false;
+                submitBtn.textContent = '提交申请';
+                form.reset();
+            }, 1000);
+        });
+
+        // 输入验证
+        const inputs = document.querySelectorAll('input[pattern]');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.value && !new RegExp(this.pattern).test(this.value)) {
+                    this.style.borderColor = '#dc3545';
+                } else {
+                    this.style.borderColor = '#dee2e6';
+                }
+            });
+        });
+
+        // 添加触摸设备支持
+        if ('ontouchstart' in window) {
+            document.body.classList.add('touch-device');
+        }
+    </script>
+</body>
+</html> 
